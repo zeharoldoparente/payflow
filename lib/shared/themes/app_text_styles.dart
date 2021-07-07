@@ -51,7 +51,7 @@ class TextStyles {
   static final buttonGray = GoogleFonts.inter(
     fontSize: 15,
     fontWeight: FontWeight.w400,
-    color: AppColors.gray,
+    color: AppColors.grey,
   );
   static final buttonBackground = GoogleFonts.inter(
     fontSize: 15,
@@ -71,12 +71,17 @@ class TextStyles {
   static final buttonBoldGray = GoogleFonts.inter(
     fontSize: 15,
     fontWeight: FontWeight.w700,
-    color: AppColors.gray,
+    color: AppColors.grey,
   );
   static final buttonBoldBackground = GoogleFonts.inter(
     fontSize: 15,
     fontWeight: FontWeight.w700,
     color: AppColors.background,
+  );
+  static final input = GoogleFonts.inter(
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    color: AppColors.input,
   );
   static final captionBackground = GoogleFonts.inter(
     fontSize: 13,

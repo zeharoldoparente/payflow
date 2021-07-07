@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:playflow/shared/models/user_models.dart';
+import 'package:playflow/shared/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController {
@@ -11,7 +11,7 @@ class AuthController {
     if (user != null) {
       saveUser(user);
       _user = user;
-      Navigator.pushReplacementNamed(context, "/home");
+      Navigator.pushReplacementNamed(context, "/home", arguments: user);
     } else {
       Navigator.pushReplacementNamed(context, "/login");
     }

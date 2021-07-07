@@ -3,10 +3,11 @@ import 'package:playflow/modules/barcode_scanner/barcode_scanner_controller.dart
 import 'package:playflow/modules/barcode_scanner/barcode_scanner_status.dart';
 import 'package:playflow/shared/themes/app_colors.dart';
 import 'package:playflow/shared/themes/app_text_styles.dart';
-import 'package:playflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
+import 'package:playflow/shared/widgets/bottom_sheet/bottom_sheet_widget.dart';
+import 'package:playflow/shared/widgets/set_buttons/set_label_buttons.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
-  const BarcodeScannerPage({Key? key}) : super(key: key);
+  BarcodeScannerPage({Key? key}) : super(key: key);
 
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
@@ -18,6 +19,13 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   @override
   void initState() {
     controller.getAvailableCameras();
+    controller.statusNotifier.addListener(() {
+      if (controller.status.hasBarcode) {
+        Navigator.pushReplacementNamed(context, "/insert_boleto",
+            arguments: controller.status.barcode);
+      }
+    });
+
     super.initState();
   }
 
@@ -29,14 +37,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    /* return BottonSheetWidget(
-      title: "Não foi possívle identificar um código de barras",
-      subtitle: "Tente escanear novamente ou digite o código do seu boleto",
-      label: "Escanear novamente",
-      onPressedLabel: () {},
-      label2: "Digitar código",
-      onPressedLabel2: () {},
-    ); */
     return SafeArea(
       top: true,
       bottom: true,
@@ -45,28 +45,27 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
       child: Stack(
         children: [
           ValueListenableBuilder<BarcodeScannerStatus>(
-            valueListenable: controller.statusNotifier,
-            builder: (_, status, __) {
-              if (status.showCamera) {
-                return Container(
-                  child: status.cameraController!.buildPreview(),
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
+              valueListenable: controller.statusNotifier,
+              builder: (_, status, __) {
+                if (status.showCamera) {
+                  return Container(
+                    color: Colors.blue,
+                    child: controller.cameraController!.buildPreview(),
+                  );
+                } else {
+                  return Container();
+                }
+              }),
           RotatedBox(
             quarterTurns: 1,
             child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: AppBar(
                   backgroundColor: Colors.black,
-                  title: Center(
-                    child: Text(
-                      "Escaneie o código de barras do boleto",
-                      style: TextStyles.buttonBackground,
-                    ),
+                  centerTitle: true,
+                  title: Text(
+                    "Escaneie o código de barras do boleto",
+                    style: TextStyles.buttonBackground,
                   ),
                   leading: BackButton(
                     color: AppColors.background,
@@ -75,23 +74,56 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                 body: Column(
                   children: [
                     Expanded(
-                      child: Container(color: Colors.black.withOpacity(0.6)),
+                      child: Container(
+                        color: Colors.black,
+                      ),
                     ),
                     Expanded(
                       flex: 2,
-                      child: Container(color: Colors.transparent),
+                      child: Container(
+                        color: Colors.transparent,
+                      ),
                     ),
                     Expanded(
-                      child: Container(color: Colors.black.withOpacity(0.6)),
-                    ),
+                      child: Container(
+                        color: Colors.black.withOpacity(0.6),
+                      ),
+                    )
                   ],
                 ),
                 bottomNavigationBar: SetLabelButtons(
-                    label: "Inserir código do boleto",
-                    onPressedLabel: () {},
-                    label2: "Adicionar da galeria",
-                    onPressedLabel2: () {})),
+                  labelPrimary: "Inserir código do boleto",
+                  onTapPrimary: () {
+                    Navigator.pushReplacementNamed(context, "/insert_boleto");
+                  },
+                  labelSecondary: "Adicionar da galeria",
+                  onTapSecondary: controller.scanWithImagePicker,
+                )),
           ),
+          ValueListenableBuilder<BarcodeScannerStatus>(
+              valueListenable: controller.statusNotifier,
+              builder: (_, status, __) {
+                if (status.hasError) {
+                  return Align(
+                      alignment: Alignment.bottomLeft,
+                      child: BottomSheetWidget(
+                          labelPrimary: "Escanear novamente",
+                          onTapPrimary: () {
+                            controller.scanWithCamera();
+                          },
+                          labelSecondary: "Digitar código",
+                          onTapSecondary: () {
+                            Navigator.pushReplacementNamed(
+                                context, "/insert_boleto");
+                          },
+                          title:
+                              "Não foi possível identificar um código de barras.",
+                          subtitle:
+                              "Tente escanear novamente ou digite o código do seu boleto."));
+                } else {
+                  return Container();
+                }
+              }),
         ],
       ),
     );
